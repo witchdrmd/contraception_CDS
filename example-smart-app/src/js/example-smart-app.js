@@ -43,6 +43,13 @@
           var diastolicbp = getBloodPressureValue(byCodes('55284-4'),'8462-4');
           var hdl = byCodes('2085-9');
           var ldl = byCodes('2089-1');
+          var conditionList = Fhir
+          .search()
+          .forResource('Condition')
+          .where('subject', smart.patient)
+          .asList();
+    
+
 
           var p = defaultPatient();
           p.birthdate = patient.birthDate;
@@ -62,6 +69,7 @@
 
           p.hdl = getQuantityValueAndUnit(hdl[0]);
           p.ldl = getQuantityValueAndUnit(ldl[0]);
+          p.conditionList = conditionList;
 
           ret.resolve(p);
         });
@@ -86,6 +94,7 @@
       diastolicbp: {value: ''},
       ldl: {value: ''},
       hdl: {value: ''},
+      conditionList: {value: ''},
     };
   }
 
@@ -129,57 +138,8 @@
     $('#diastolicbp').html(p.diastolicbp);
     $('#ldl').html(p.ldl);
     $('#hdl').html(p.hdl);
-    $('#med_list').html(p.med_list);
+    $('#conditionList').html(p.conditionList);
   };
   
-
-
-        function getMedicationName (medCodings) {
-            var coding = medCodings.find(function(c){
-                return c.system == "http://www.nlm.nih.gov/research/umls/rxnorm";
-            });
-            return coding && coding.display || "Unnamed Medication(TM)";
-        }
-
-        var med_list = document.getElementById('med_list');
-
-        function displayMedication (medCodings) {
-            med_list.innerHTML += "<li> " + getMedicationName(medCodings) + "</li>";
-        }
-
-        FHIR.oauth2.ready(function(smart){
-            smart.patient.read().then(function(pt) {
-                displayPatient (pt);
-
-                // smart.api.patient.fetcAllWithReferences(...) does not work
-                // with fhir-client.js. MedicationRequest is not listed in 
-                // https://github.com/FHIR/fhir.js/blob/master/src/middlewares/patient.js#L5
-                // and we have to explicitly search with patient id
-                smart.api.fetchAllWithReferences(
-                    { 
-                        type: "MedicationRequest",
-                        query: {
-                            patient: pt.id
-                        }
-                    },
-                    [ "MedicationRequest.medicationReference" ]
-                ).then(function(results, refs) {
-                    if (results.length) {
-                        med_list.innerHTML = "";
-                        results.forEach(function(prescription){
-                            if (prescription.medicationCodeableConcept) {
-                                displayMedication(prescription.medicationCodeableConcept.coding);
-                            } else if (prescription.medicationReference) {
-                                var med = refs(prescription, prescription.medicationReference);
-                                displayMedication(med && med.code.coding || []);
-                            }
-                        });
-                    }
-                    else {
-                        med_list.innerHTML = "No medications found for the selected patient";
-                    }
-                });
-            });
-        });
 
 })(window);
