@@ -21,9 +21,18 @@
                       }
                     }
                   });
-
+        var condy = smart.patient.api.fetchAll({
+                    type: 'Condition',
+                    query: {
+                      code: {
+                        
+                      }
+                    }
+                  });
+        
         $.when(pt, obv).fail(onError);
-
+        $.when(pt, condy).fail(onError);
+        
         $.when(pt, obv).done(function(patient, obv) {
           var byCodes = smart.byCodes(obv, 'code');
           var gender = patient.gender;
@@ -48,6 +57,7 @@
           p.fname = fname;
           p.lname = lname;
           p.height = getQuantityValueAndUnit(height[0]);
+          p.condy= condy;
 
           if (typeof systolicbp != 'undefined')  {
             p.systolicbp = systolicbp;
@@ -83,6 +93,7 @@
       diastolicbp: {value: ''},
       ldl: {value: ''},
       hdl: {value: ''},
+      condy: {value: ''},
     };
   }
 
@@ -126,6 +137,7 @@
     $('#diastolicbp').html(p.diastolicbp);
     $('#ldl').html(p.ldl);
     $('#hdl').html(p.hdl);
+    $('#condy').html(p.condy);
   };
 
 })(window);
