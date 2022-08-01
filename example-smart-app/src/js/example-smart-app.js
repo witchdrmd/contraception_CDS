@@ -43,11 +43,7 @@
           var diastolicbp = getBloodPressureValue(byCodes('55284-4'),'8462-4');
           var hdl = byCodes('2085-9');
           var ldl = byCodes('2089-1');
-          var conditionList = Fhir
-          .search()
-          .forResource('Condition')
-          .where('subject', smart.patient)
-          .asList();
+         
     
 
 
@@ -94,7 +90,7 @@
       diastolicbp: {value: ''},
       ldl: {value: ''},
       hdl: {value: ''},
-      conditionList: {value: ''},
+
     };
   }
 
@@ -138,7 +134,7 @@
     $('#diastolicbp').html(p.diastolicbp);
     $('#ldl').html(p.ldl);
     $('#hdl').html(p.hdl);
-    $('#conditionList').html(p.conditionList);
+
   };
   
 
